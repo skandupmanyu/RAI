@@ -32,6 +32,28 @@ class RAIFairnessScenarios:
 
         return self
 
+    def predict(self, X_pred, pg_pred, scenario="demog"):
+        preds_proba_raw = self._clf.predict_proba(X_pred)
+        y_pred_proba = np.array(preds_proba_raw)[:, 1]
+
+        if scenario == "naive":
+            y_pred = self._clf.predict(X_pred)
+        if scenario == "thresh_best":
+            y_pred = (y_pred_proba > self.thresh_best_).astype("int")
+        if scenario == "historic":
+            y_pred = np.where(
+                pg_pred == 1,
+                (y_pred_proba >= self.thresh_hist_pg_).astype(int),
+                (y_pred_proba >= self.thresh_hist_non_pg_).astype(int),
+            )
+        if scenario == "demog":
+            y_pred = np.where(
+                pg_pred == 1,
+                (y_pred_proba > self.thresh_demog_pg_).astype(int),
+                (y_pred_proba > self.thresh_demog_non_pg_).astype(int),
+            )
+        return y_pred
+
     def _simulate(self, y_val, y_pred_naive, y_pred_proba, pg_val):
         """
         Parameters
@@ -208,7 +230,7 @@ class RAIFairnessScenarios:
             threshold = force_thresh[0]
             self.thresh_best_ = threshold
             self._scenarios_output_df["preds_threshold"] = (
-                self._scenarios_output_df["preds_proba"] > threshold
+                self._scenarios_output_df["preds_proba"] > self.thresh_best_
             ).astype("int")
             scenario_select = self._scenarios_output_df
 
@@ -261,10 +283,10 @@ class RAIFairnessScenarios:
 
             # Create predictions using model output probabilities
             X_test_pg["predictions_hist"] = (
-                X_test_pg["preds_proba"] >= threshold_pg
+                X_test_pg["preds_proba"] >= self.thresh_hist_pg_
             ).astype("int")
             X_test_non_pg["predictions_hist"] = (
-                X_test_non_pg["preds_proba"] >= threshold_non_pg
+                X_test_non_pg["preds_proba"] >= self.thresh_hist_non_pg_
             ).astype("int")
 
             # Combine DFs
@@ -299,10 +321,10 @@ class RAIFairnessScenarios:
 
             # Create predictions using model output probabilities
             X_test_pg["preds_demographic"] = (
-                X_test_pg["preds_proba"] > threshold_pg
+                X_test_pg["preds_proba"] > self.thresh_demog_pg_
             ).astype("int")
             X_test_non_pg["preds_demographic"] = (
-                X_test_non_pg["preds_proba"] > threshold_non_pg
+                X_test_non_pg["preds_proba"] > self.thresh_demog_non_pg_
             ).astype("int")
 
             # Combine DFs
