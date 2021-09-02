@@ -4,18 +4,35 @@ This function trains a groups the model predicted outcomes by the
 the predicted probabilities and default model binary predictions, as well as the
 outcome and protected group arrays
 """
+import numpy as np
+
 # Import libraries for data analysis
 import pandas as pd
 from sklearn import metrics
+from sklearn.base import clone
 
 
 class RAIFairnessScenarios:
-    def __init__(self, target_rate, bias_detect_thresh) -> None:
+    def __init__(self, clf, target_rate, bias_detect_thresh) -> None:
         self._target_rate = target_rate
         self._bias_detect_thresh = bias_detect_thresh
         self._scenarios_output_df = pd.DataFrame()
+        self._clf = clone(clf)
 
-    def fit(self, outcome_array, preds_naive, preds_proba, pg_array):
+    def fit(self, X_train, y_train, X_val, y_val, pg_val):
+        self._clf.fit(X_train, y_train)
+
+        # Output model predictions and probabilities
+        preds_proba_raw = self._clf.predict_proba(X_val)
+        y_pred_proba = np.array(preds_proba_raw)[:, 1]
+        y_pred_naive = self._clf.predict(X_val)
+        fairness_scenarios = self._simulate(y_val, y_pred_naive, y_pred_proba, pg_val)
+
+        self.fairness_summary_ = fairness_scenarios
+
+        return self
+
+    def _simulate(self, y_val, y_pred_naive, y_pred_proba, pg_val):
         """
         Parameters
         ----------
@@ -48,10 +65,10 @@ class RAIFairnessScenarios:
         """
         # Create DF from input arrays
 
-        self._scenarios_output_df["y_true"] = outcome_array
-        self._scenarios_output_df["protected_group"] = pg_array
-        self._scenarios_output_df["preds_proba"] = preds_proba
-        self._scenarios_output_df["preds_naive"] = preds_naive
+        self._scenarios_output_df["y_true"] = y_val
+        self._scenarios_output_df["protected_group"] = pg_val
+        self._scenarios_output_df["preds_proba"] = y_pred_proba
+        self._scenarios_output_df["preds_naive"] = y_pred_naive
 
         # To test the fairness scenarios, we split the data among the protected and
         # non-protected groups, and we explore the accuracy and confusion matrix
@@ -59,21 +76,60 @@ class RAIFairnessScenarios:
 
         # Run get bias metrics function
         # Scenario 1
-        # print("Scenario 1 - Naive Model")
-        output_list_1 = self._run_model_scenario("preds_naive")
+        output_naive = self._run_model_scenario("preds_naive")
+        (
+            self.bias_test_naive_,
+            self.bias_index_naive_,
+            self.acc_naive_,
+            self.TP_naive_,
+            self.FN_naive_,
+            self.TN_naive_,
+            self.FP_naive_,
+            self.non_pg_rate_naive_,
+        ) = output_naive
+
         # Scenario 2
-        # print("Scenario 2 - Threshold Specific Model")
-        output_list_2 = self._run_model_scenario("preds_threshold")
+        output_th_best = self._run_model_scenario("preds_threshold")
+        (
+            self.bias_test_th_best_,
+            self.bias_index_th_best_,
+            self.acc_th_best_,
+            self.TP_th_best_,
+            self.FN_th_best_,
+            self.TN_th_best_,
+            self.FP_th_best_,
+            self.non_pg_rate_th_best_,
+        ) = output_th_best
+
         # Scenario 3
-        # print("Scenario 3 - Historic Parity at Threshold")
-        output_list_3 = self._run_model_scenario("preds_historic")
+        output_hist = self._run_model_scenario("preds_historic")
+        (
+            self.bias_test_hist_,
+            self.bias_index_hist_,
+            self.acc_hist_,
+            self.TP_hist_,
+            self.FN_hist_,
+            self.TN_hist_,
+            self.FP_hist_,
+            self.non_pg_rate_hist_,
+        ) = output_hist
+
         # Scenario 4
-        # print("Scenario 4 - Demographic Parity at Threshold")
-        output_list_4 = self._run_model_scenario("preds_demographic")
+        output_demog = self._run_model_scenario("preds_demographic")
+        (
+            self.bias_test_demog_,
+            self.bias_index_demog_,
+            self.acc_demog_,
+            self.TP_demog_,
+            self.FN_demog_,
+            self.TN_demog_,
+            self.FP_demog_,
+            self.non_pg_rate_demog_,
+        ) = output_demog
 
         # Combine DFs
         output_list = pd.DataFrame(
-            list(zip(output_list_1, output_list_2, output_list_3, output_list_4))
+            list(zip(output_naive, output_th_best, output_hist, output_demog))
         )
 
         # Formatting
@@ -107,10 +163,10 @@ class RAIFairnessScenarios:
         # fairness_scenarios["Threshold_Used"] = self._target_rate
         # fairness_scenarios["Protected_Group"] = "protected_group"
 
-        self.preds_naive = self._scenarios_output_df["preds_naive"].values
-        self.preds_threshold = self._scenarios_output_df["preds_threshold"].values
-        self.preds_historic = self._scenarios_output_df["preds_historic"].values
-        self.preds_demographic = self._scenarios_output_df["preds_demographic"].values
+        self.preds_naive_ = self._scenarios_output_df["preds_naive"].values
+        self.preds_threshold_ = self._scenarios_output_df["preds_threshold"].values
+        self.preds_historic_ = self._scenarios_output_df["preds_historic"].values
+        self.preds_demographic_ = self._scenarios_output_df["preds_demographic"].values
 
         return fairness_scenarios
 
@@ -150,7 +206,7 @@ class RAIFairnessScenarios:
                 self._scenarios_output_df["preds_proba"]
             ).quantile(self._target_rate)
             threshold = force_thresh[0]
-            self.thresh_best = threshold
+            self.thresh_best_ = threshold
             self._scenarios_output_df["preds_threshold"] = (
                 self._scenarios_output_df["preds_proba"] > threshold
             ).astype("int")
@@ -200,8 +256,8 @@ class RAIFairnessScenarios:
             # step
             threshold_pg = pg_thresh[0]
             threshold_non_pg = non_pg_thresh[0]
-            self.thresh_hist_pg = threshold_pg
-            self.thresh_hist_non_pg = threshold_non_pg
+            self.thresh_hist_pg_ = threshold_pg
+            self.thresh_hist_non_pg_ = threshold_non_pg
 
             # Create predictions using model output probabilities
             X_test_pg["predictions_hist"] = (
@@ -238,8 +294,8 @@ class RAIFairnessScenarios:
             # step
             threshold_pg = pg_thresh_eq[0]
             threshold_non_pg = non_pg_thresh_eq[0]
-            self.thresh_demog_pg = threshold_pg
-            self.thresh_demog_non_pg = threshold_non_pg
+            self.thresh_demog_pg_ = threshold_pg
+            self.thresh_demog_non_pg_ = threshold_non_pg
 
             # Create predictions using model output probabilities
             X_test_pg["preds_demographic"] = (
