@@ -6,32 +6,28 @@ from scipy.stats import chi2_contingency
 class RAIDataBaisCheck:
     def __init__(
         self,
-        protected_group,
-        test_col,
         pvalue_threshold=0.1,
         test_type="z-test",
         is_2_sided=False,
     ) -> None:
-        self._protected_group = protected_group
-        self._test_col = test_col
         self._pvalue_threshold = pvalue_threshold
         self._is_2_sided = is_2_sided
         self._test_type = test_type
 
-    def fit(self, df):
+    def fit(self, pg, y):
 
         if self._test_type == "z-test":
-            metrics = self._stat_test_z(df)
+            metrics = self._stat_test_z(pg, y)
         elif self._test_type == "categorical":
-            metrics = self._stat_test_z(df)
+            metrics = self._stat_test_z(pg, y)
         elif self._test_type == "welch":
-            metrics = self._stat_test_welch(df)
+            metrics = self._stat_test_welch(pg, y)
         else:
-            metrics = self._stat_test_z(df)
+            metrics = self._stat_test_z(pg, y)
 
         return metrics
 
-    def _stat_test_categoric(self, df):
+    def _stat_test_categoric(self, pg, y):
         """
         This function tests whether there's difference among classes in protected group
         regarding to test column.
@@ -46,20 +42,20 @@ class RAIDataBaisCheck:
             expected: the expected frequencies
         """
 
-        ctable = pd.crosstab(df[self._protected_group], df[self._test_col])
+        ctable = pd.crosstab(pg, y)
 
-        self.chi2, self.p_value, self.dof, self.ex = chi2_contingency(
+        self.chi2, self.p_value_, self.dof, self.ex = chi2_contingency(
             ctable, correction=False
         )
 
-        if self.p_value < self._pvalue_threshold:
-            self.biased = True
+        if self.p_value_ < self._pvalue_threshold:
+            self.biased_ = True
         else:
-            self.biased = False
+            self.biased_ = False
 
-        return self.biased, self.p_value
+        return self.biased_, self.p_value_
 
-    def _stat_test_z(self, df):
+    def _stat_test_z(self, pg, y):
         """
         This function does z test on test variable
         :param df: input dataframe
@@ -69,29 +65,29 @@ class RAIDataBaisCheck:
         :return: statistics, pvalue
         """
 
-        class_names = df[self._protected_group].unique()
+        class_names = pg.unique()
 
-        self.historic_crosstab = pd.crosstab(
-            df[self._protected_group], df[self._test_col]
-        ).apply(lambda r: r / r.sum(), axis=1)
+        self.historic_crosstab_ = pd.crosstab(pg, y).apply(
+            lambda r: r / r.sum(), axis=1
+        )
 
-        var1 = df[df[self._protected_group] == class_names[0]][self._test_col]
-        var2 = df[df[self._protected_group] == class_names[1]][self._test_col]
+        var1 = y[pg == class_names[0]]
+        var2 = y[pg == class_names[1]]
 
         # equal_val = False makes it a welch test
-        self.statistics, self.p_value = stats.ttest_ind(var1, var2, equal_var=True)
+        self.statistics, self.p_value_ = stats.ttest_ind(var1, var2, equal_var=True)
 
         if not self._is_2_sided:
-            self.p_value = self.p_value / 2
+            self.p_value_ = self.p_value_ / 2
 
-        if self.p_value < self._pvalue_threshold:
-            self.biased = True
+        if self.p_value_ < self._pvalue_threshold:
+            self.biased_ = True
         else:
-            self.biased = False
+            self.biased_ = False
 
-        return self.biased, self.p_value
+        return self.biased_, self.p_value_
 
-    def _stat_test_welch(self, df):
+    def _stat_test_welch(self, pg, y):
         """
         This function does welch test on test variable
         :param df: input dataframe
@@ -101,20 +97,20 @@ class RAIDataBaisCheck:
         :return: statistics, pvalue
         """
 
-        class_names = df[self._protected_group].unique()
+        class_names = pg.unique()
 
-        var1 = df[df[self._protected_group] == class_names[0]][self._test_col]
-        var2 = df[df[self._protected_group] == class_names[1]][self._test_col]
+        var1 = y[pg == class_names[0]]
+        var2 = y[pg == class_names[1]]
 
         # equal_val = False makes it a welch test
-        self.statistics, self.p_value = stats.ttest_ind(var1, var2, equal_var=False)
+        self.statistics, self.p_value_ = stats.ttest_ind(var1, var2, equal_var=False)
 
         if not self._is_2_sided:
-            self.p_value = self.p_value / 2
+            self.p_value_ = self.p_value_ / 2
 
-        if self.p_value < self._pvalue_threshold:
-            self.biased = True
+        if self.p_value_ < self._pvalue_threshold:
+            self.biased_ = True
         else:
-            self.biased = False
+            self.biased_ = False
 
-        return self.biased, self.p_value
+        return self.biased_, self.p_value_
