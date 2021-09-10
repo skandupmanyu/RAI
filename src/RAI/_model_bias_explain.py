@@ -5,11 +5,8 @@ the predicted probabilities and default model binary predictions, as well as the
 outcome and protected group arrays
 """
 import numpy as np
-
-# Import libraries for data analysis
 import pandas as pd
 from sklearn import metrics
-from sklearn.base import clone
 
 
 class RAIFairnessScenarios:
@@ -17,44 +14,43 @@ class RAIFairnessScenarios:
         self._target_rate = target_rate
         self._bias_detect_thresh = bias_detect_thresh
         self._scenarios_output_df = pd.DataFrame()
-        self._clf = clone(clf)
+        self._clf = clf
 
-    def fit(self, X_train, y_train, X_val, y_val, pg_val):
-        self._clf.fit(X_train, y_train)
+    def fit(self, X, y, pg):
 
         # Output model predictions and probabilities
-        preds_proba_raw = self._clf.predict_proba(X_val)
+        preds_proba_raw = self._clf.predict_proba(X)
         y_pred_proba = np.array(preds_proba_raw)[:, 1]
-        y_pred_naive = self._clf.predict(X_val)
-        fairness_scenarios = self._simulate(y_val, y_pred_naive, y_pred_proba, pg_val)
+        y_pred_naive = self._clf.predict(X)
+        fairness_scenarios = self._simulate(y, y_pred_naive, y_pred_proba, pg)
 
         self.fairness_summary_ = fairness_scenarios
 
         return self
 
-    def predict(self, X_pred, pg_pred, scenario="demog"):
-        preds_proba_raw = self._clf.predict_proba(X_pred)
+    def predict(self, X, pg, scenario="demog"):
+        preds_proba_raw = self._clf.predict_proba(X)
         y_pred_proba = np.array(preds_proba_raw)[:, 1]
 
         if scenario == "naive":
-            y_pred = self._clf.predict(X_pred)
+            y_pred = self._clf.predict(X)
         if scenario == "thresh_best":
             y_pred = (y_pred_proba > self.thresh_best_).astype("int")
         if scenario == "historic":
             y_pred = np.where(
-                pg_pred == 1,
+                pg == 1,
                 (y_pred_proba >= self.thresh_hist_pg_).astype(int),
                 (y_pred_proba >= self.thresh_hist_non_pg_).astype(int),
             )
         if scenario == "demog":
             y_pred = np.where(
-                pg_pred == 1,
+                pg == 1,
                 (y_pred_proba > self.thresh_demog_pg_).astype(int),
                 (y_pred_proba > self.thresh_demog_non_pg_).astype(int),
             )
         return y_pred
 
-    def _simulate(self, y_val, y_pred_naive, y_pred_proba, pg_val):
+    def _simulate(self, y, y_pred_naive, y_pred_proba, pg):
         """
         Parameters
         ----------
@@ -87,8 +83,8 @@ class RAIFairnessScenarios:
         """
         # Create DF from input arrays
 
-        self._scenarios_output_df["y_true"] = y_val
-        self._scenarios_output_df["protected_group"] = pg_val
+        self._scenarios_output_df["y_true"] = y
+        self._scenarios_output_df["protected_group"] = pg
         self._scenarios_output_df["preds_proba"] = y_pred_proba
         self._scenarios_output_df["preds_naive"] = y_pred_naive
 
