@@ -3,29 +3,41 @@ from scipy import stats
 from scipy.stats import chi2_contingency
 
 
-class RAIDataBaisCheck:
+class DataBiasChecker:
     def __init__(
         self,
         pvalue_threshold=0.1,
         test_type="z-test",
         is_2_sided=False,
     ) -> None:
-        self._pvalue_threshold = pvalue_threshold
-        self._is_2_sided = is_2_sided
-        self._test_type = test_type
+        self.pvalue_threshold = pvalue_threshold
+        self.is_2_sided = is_2_sided
+        self.test_type = test_type
 
     def fit(self, pg, y):
 
-        if self._test_type == "z-test":
-            metrics = self._stat_test_z(pg, y)
-        elif self._test_type == "categorical":
-            metrics = self._stat_test_z(pg, y)
-        elif self._test_type == "welch":
-            metrics = self._stat_test_welch(pg, y)
+        if self.test_type == "z-test":
+            self._stat_test_z(pg, y)
+        elif self.test_type == "categorical":
+            self._stat_test_z(pg, y)
+        elif self.test_type == "welch":
+            self._stat_test_welch(pg, y)
         else:
-            metrics = self._stat_test_z(pg, y)
+            self._stat_test_z(pg, y)
 
-        return metrics
+        return self
+
+    def get_params(self):
+        return {
+            "pvalue_threshold": self.pvalue_threshold,
+            "test_type": self.test_type,
+            "is_2_sided": self.is_2_sided,
+        }
+
+    def set_params(self, **parameters):
+        for parameter, value in parameters.items():
+            setattr(self, parameter, value)
+        return self
 
     def _stat_test_categoric(self, pg, y):
         """
@@ -48,7 +60,7 @@ class RAIDataBaisCheck:
             ctable, correction=False
         )
 
-        if self.p_value_ < self._pvalue_threshold:
+        if self.p_value_ < self.pvalue_threshold:
             self.biased_ = True
         else:
             self.biased_ = False
@@ -77,10 +89,10 @@ class RAIDataBaisCheck:
         # equal_val = False makes it a welch test
         self.statistics, self.p_value_ = stats.ttest_ind(var1, var2, equal_var=True)
 
-        if not self._is_2_sided:
+        if not self.is_2_sided:
             self.p_value_ = self.p_value_ / 2
 
-        if self.p_value_ < self._pvalue_threshold:
+        if self.p_value_ < self.pvalue_threshold:
             self.biased_ = True
         else:
             self.biased_ = False
@@ -105,10 +117,10 @@ class RAIDataBaisCheck:
         # equal_val = False makes it a welch test
         self.statistics, self.p_value_ = stats.ttest_ind(var1, var2, equal_var=False)
 
-        if not self._is_2_sided:
+        if not self.is_2_sided:
             self.p_value_ = self.p_value_ / 2
 
-        if self.p_value_ < self._pvalue_threshold:
+        if self.p_value_ < self.pvalue_threshold:
             self.biased_ = True
         else:
             self.biased_ = False
