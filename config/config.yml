@@ -1,0 +1,26 @@
+pg_target: 'hispanic'  #target list = ['hispanic','black','asian','non_white','other_race']
+rai_target: 'high_income'
+pos_rate: 0.2
+bias_ranker:
+  pos_rate: 0.2
+  bias_tolerance: 0.2
+latest_year_dataset: 2020
+sample_size: 200000
+random_state_sample: 42
+features:
+  a:
+    - 1
+model:
+  name: 'LGBMClassifier'
+  params:
+    max_depth: 3
+    n_estimators: 1000
+    objective: "binary"
+  training_params:
+    early_stopping_rounds: 100
+    verbose: 100
+  grid_search:
+    n_estimators: [100, 200, 400]
+    max_depth: [4, 6, 8, 10]
+test_cutoff: 0.8
+split_random_size: 42
