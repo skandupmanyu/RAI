@@ -1,0 +1,3 @@
+- read the config once and send it in all functions
+- lower case all columns
+- take the 7.1% from the table
