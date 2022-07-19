@@ -61,7 +61,7 @@ def save_training_output(output, *, directory):
 def save_rai_training_output(output, *, directory):
 
     save_dataset(output[filenames.BIAS_RANK_ACTUAL], path=directory / f'{filenames.BIAS_RANK_ACTUAL}.csv')
-    save_dataset(output[filenames.BIAS_RANK_ACTUAL], path=directory / f'{filenames.BIAS_RANK_PROXY}.csv')
+    save_dataset(output[filenames.BIAS_RANK_PROXY], path=directory / f'{filenames.BIAS_RANK_PROXY}.csv')
 
 def load_model(path):
     return joblib.load(path)
