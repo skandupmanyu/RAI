@@ -5,8 +5,7 @@ import numpy as np
 import pandas as pd
 from lightgbm import LGBMClassifier
 
-from src import config
-from src.config.directories import directories
+from src import config, directories
 from src.constants.filenames import DATASET
 from src.in_out import load_dataset, save_training_output, save_rai_training_output
 from src.train import train_proxy, train_rai

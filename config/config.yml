@@ -1,3 +1,5 @@
+model_name: 'proxy_model_race_income'
+
 pg_target: 'hispanic'  #target list = ['hispanic','black','asian','non_white','other_race']
 rai_target: 'high_income'
 pos_rate: 0.2
@@ -8,8 +10,17 @@ latest_year_dataset: 2020
 sample_size: 200000
 random_state_sample: 42
 features:
-  a:
-    - 1
+  INCTOT : 'inctot' #
+  AGE : 'age'
+  YEAR : 'year'
+  MET2013 : 'met2013'  #2013 US Census metropolitan area
+  RACE : 'race'
+  HISPAN : 'hispan'
+  RENT : 'rent'
+  MORTGAGE : 'mortgage'
+  HHTYPE : 'hhtype'  #similar to married status/with dependents
+  EDUC : 'educ'  #educated
+  MARST : 'marst'  #Marital status
 model:
   name: 'LGBMClassifier'
   params:

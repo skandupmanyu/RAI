@@ -8,14 +8,14 @@ from sklearn.model_selection import train_test_split, GridSearchCV
 from src.RAI import ModelBiasRanker
 from src.evaluation import evaluate_model, create_plots
 from src.in_out import save_dataset
-from src.config.directories import directories
+from src.config import directories
 from src.constants import CROSS_TAB_METRICS, INCTOT
 
 logger = logging.getLogger(__name__)
 
 def train_proxy(model, model_data, config):
     X = model_data.drop(labels=[config.pg_target], axis=1)
-    X = X.drop(labels=['ID',INCTOT], axis=1)
+    X = X.drop(labels=['id',INCTOT], axis=1)
 
     y = model_data[config.pg_target]
 

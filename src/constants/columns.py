@@ -2,26 +2,25 @@
 Columns constants
 """
 # original columns
-INCTOT = 'INCTOT' #
-AGE = 'AGE'
-YEAR = 'YEAR'
-MET2013 ='MET2013'  #2013 US Census metropolitan area
-RACE = 'RACE'
-HISPAN = 'HISPAN'
-RENT = 'RENT'
-MORTGAGE = 'MORTGAGE'
-SERIAL  = 'SERIAL'   #track individuals over time
-CBSERIAL = 'CBSERIAL' #not used
-NUMPREC = 'NUMPREC' #not used
-SUBSAMP = 'SUBSAMP' #not used
-HHWT = 'HHWT' #not used
-HHTYPE = 'HHTYPE'  #similar to married status/with dependents
-EDUC = 'EDUC'  #educated
-MARST = 'MARST'  #Marital status
+INCTOT = 'inctot' #
+AGE = 'age'
+YEAR = 'year'
+MET2013 ='met2013'  #2013 US Census metropolitan area
+RACE = 'race'
+HISPAN = 'hispan'
+RENT = 'rent'
+MORTGAGE = 'mortgage'
+# SERIAL  = 'serial'   #track individuals over time
+# CBSERIAL = 'cbserial' #not used
+# NUMPREC = 'numprec' #not used
+# SUBSAMP = 'subsamp' #not used
+# HHWT = 'hhwt' #not used
+HHTYPE = 'hhtype'  #similar to married status/with dependents
+EDUC = 'educ'  #educated
+MARST = 'marst'  #Marital status
 
-COLUMNS = ['INCTOT', 'AGE', 'YEAR', 'MET2013', 'RACE', 'HISPAN', 'RENT', 'MORTGAGE',
-           'SERIAL', 'CBSERIAL', 'NUMPREC', 'SUBSAMP', 'HHWT', 'HHTYPE', 'EDUC', 'MARST']
+COLUMNS = ['HISPAN','INCTOT', 'AGE', 'YEAR', 'MET2013', 'RACE', 'RENT', 'MORTGAGE', 'HHTYPE', 'EDUC', 'MARST']
+NUMERICAL_VAR = ['rent', 'mortgage', 'age', 'inctot']
 
-NUMERICAL_VAR = ['RENT', 'MORTGAGE', 'AGE', 'INCTOT']
+CATEGORICAL_VAR = ['educ', 'marst', 'hhtype']
 
-CATEGORICAL_VAR = ['EDUC', 'MARST', 'HHTYPE']

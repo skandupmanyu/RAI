@@ -3,17 +3,6 @@ import logging
 import numpy as np
 import pandas as pd
 from sklearn import preprocessing
-from sklearn.model_selection import GridSearchCV
-from sklearn.ensemble import RandomForestClassifier
-
-from sklearn.metrics import log_loss
-from sklearn.tree import DecisionTreeClassifier
-from sklearn.preprocessing import LabelEncoder
-from sklearn import datasets, metrics, model_selection, svm
-
-from src import config
-from src.constants.columns import *
-from src.constants.features import *
 
 __all__ = ['build_features_set']
 
@@ -21,7 +10,7 @@ logger = logging.getLogger(__name__)
 
 
 
-def build_features_set(model_sample, num_vars, cat_vars):
+def build_features_set(model_sample, num_vars, cat_vars, config):
     logger.info("Building features set.")
 
     # This is an internal function which one-hot encodes all categorical and normalizes all numeric variables
@@ -35,8 +24,8 @@ def build_features_set(model_sample, num_vars, cat_vars):
     model_data_cat.index = model_sample.index
 
     # Join
-    model_data_norm['ID'] = model_data_norm.index
-    model_data = pd.concat([model_data_norm[[config.pg_target, "ID"]], model_data_cat, model_data_num], axis=1)
+    model_data_norm['id'] = model_data_norm.index
+    model_data = pd.concat([model_data_norm[[config.pg_target, "id"]], model_data_cat, model_data_num], axis=1)
 
     # Print shape of final machine-learning ready data frame
     print("Model data shape: ", model_data.shape)

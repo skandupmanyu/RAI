@@ -36,10 +36,10 @@ def create_race_groupings(model_input):
 
     # by group
     conditions = [
-        (model_input.HISPAN == 1),
-        (model_input.RACE == 4) | (model_input.RACE == 5) | (model_input.RACE == 6),
-        (model_input.RACE == 1) & (model_input.HISPAN == 0),
-        (model_input.RACE == 2)
+        (model_input['hispan'] == 1),
+        (model_input['race'] == 4) | (model_input['race'] == 5) | (model_input['race'] == 6),
+        (model_input['race'] == 1) & (model_input['hispan'] == 0),
+        (model_input['race'] == 2)
     ]
 
     choices = ['Hispanic any race', 'Asian', 'White not Hispanic', 'Black']

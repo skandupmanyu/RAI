@@ -8,7 +8,7 @@ import numpy as np
 
 from src.constants import *
 from src.constants import (
-HISPAN,
+# HISPAN,
 YEAR,
 INCTOT,
 AGE,
@@ -18,7 +18,7 @@ CATEGORICAL_VAR
 )
 from src.features import build_features_set
 from src.in_out import *
-from src.utils.utils import clean_age_income, create_race_groupings
+from src.utils.utils import clean_age_income, create_race_groupings, clean_column_names
 
 
 
@@ -30,7 +30,8 @@ logger = logging.getLogger(__name__)
 
 def build_dataset(config):
     logger.info("Loading raw dataset.")
-    dataset = get_data()
+    dataset = get_data(config)
+    dataset = dataset.rename(clean_column_names(dataset.columns), axis=1)
 
     logger.info("Filter down to working age (18-80) records for which we have income")
     dataset = clean_age_income(dataset)
@@ -38,7 +39,6 @@ def build_dataset(config):
     logger.info(f"Create a binary target variables")
     dataset = create_race_groupings(dataset)
 
-    protected_group_rate = dataset['hispanic'].value_counts(normalize=True)[1]
 
     logger.info(f"Select only historical data for training")
     dataset_historical = dataset[dataset[YEAR] < config.latest_year_dataset]
@@ -52,7 +52,7 @@ def build_dataset(config):
     num_vars = NUMERICAL_VAR + numerical_columns_created
     cat_vars = CATEGORICAL_VAR
 
-    dataset_feat = build_features_set(model_sample, num_vars, cat_vars)
+    dataset_feat = build_features_set(model_sample, num_vars, cat_vars, config)
 
     return dataset_feat
 
@@ -60,7 +60,7 @@ def build_dataset(config):
 def msa_extractor(model_input, model_input_historical, targets):
     summary_df_yr_msa = pd.DataFrame(model_input_historical.groupby(MET2013)[targets].mean())
     summary_df_yr_msa = summary_df_yr_msa.reset_index()
-    summary_df_yr_msa.columns = [MET2013, f'MSA_{targets[0]}_DENSITY', f'MSA_MEAN_{targets[1]}', f'MSA_{targets[2]}']
+    summary_df_yr_msa.columns = [MET2013, f'msa_{targets[0]}_density', f'msa_mean_{targets[1]}', f'msa_{targets[2]}']
 
     model_input = model_input.merge(summary_df_yr_msa, on=MET2013)
     numerical_columns_created = summary_df_yr_msa.columns[1:].to_list()

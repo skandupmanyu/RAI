@@ -4,11 +4,10 @@ Dataset generation script.
 """
 import logging
 
-from src.config.directories import directories
 from src.constants import DATASET
 from src.data import build_dataset
 from src.in_out import save_dataset
-from src import config
+from src import config, directories
 
 logger = logging.getLogger(__name__)
 

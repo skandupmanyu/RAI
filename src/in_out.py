@@ -4,14 +4,14 @@ import logging
 import joblib
 import pandas as pd
 
-from src.config.directories import directories
+from src import directories
 from src.constants import filenames
 from src.constants.columns import COLUMNS
 from src.exceptions import DatasetNotFoundError
 
 logger = logging.getLogger(__name__)
 
-def get_data():
+def get_data(config):
 
     logger.info("Getting dataset.")
 
@@ -24,7 +24,7 @@ def get_data():
                           sep=',',
                           quotechar='"',
                           error_bad_lines=False,
-                          usecols=COLUMNS)
+                          usecols=config.features.keys())
     logger.info(f"Dataset loaded with {len(dataset)} rows.")
 
     return dataset

@@ -3,13 +3,11 @@ import yaml
 from pathlib import Path
 from dataclasses import dataclass
 
-from src.config.directories import directories
-from src.constants import *
-from src.utils.utils import *
 
 
 @dataclass(frozen=True)
 class Config:
+    model_name: str
     pg_target: str
     rai_target: str
     pos_rate: float
@@ -27,6 +25,5 @@ def load_config_file(path):
     return cfg
 
 def get_config() -> Config:
-    config_gen = load_config_file(directories.project_config / "config.yml")
-
+    config_gen = load_config_file(Path(__file__).parents[2].resolve()/'config'/ "config.yml")
     return Config(**config_gen)
