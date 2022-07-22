@@ -55,15 +55,15 @@ def train_proxy(model, model_data):
 
     # Assign a binary indicator to the highest 7.1% of model scores - these are the proxy group
     pred_proba = fitted_model.predict_proba(X)[::, 1]
-    pg_rate = np.percentile(pred_proba, 100 - 7.1)
+    pg_rate = model_data[config.pg_target].value_counts(normalize=True)[1]
+    pg_rate_thresh = np.percentile(pred_proba, 100*(1-pg_rate))
 
     # Count number of individauls labeled among 80K training set
-    logger.info(f"Model Count number of individauls labeled among 80K training set: {np.where(pred_proba > pg_rate,1,0).sum()}.")
-    #
+    logger.info(f"Model count number of individuals labeled among training set: {np.where(pred_proba > pg_rate,1,0).sum()}.")
 
     # Perform cross-tab - accuracy is so so - 3.0 k 1,1 | 2.7 k 1,0, TPR < 70%
     crosstab_accuracy = pd.crosstab(model_data[config.pg_target],
-                np.where(fitted_model.predict_proba(X)[::, 1] > pg_rate, 1, 0))  # .apply(lambda r: r/r.sum(), axis=1)
+                np.where(fitted_model.predict_proba(X)[::, 1] > pg_rate_thresh, 1, 0))  # .apply(lambda r: r/r.sum(), axis=1)
 
     save_dataset(crosstab_accuracy, path=directories.artefacts_dir / config.model['name']/ CROSS_TAB_METRICS)
 
