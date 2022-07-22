@@ -51,12 +51,17 @@ def save_metrics(metrics, *, path):
     with open(path, 'w') as f:
         json.dump(metrics, f, indent=2)
 
+def save_plots(plots, *, path):
+    shap_values = plots['shap_values']
+    shap_values.savefig(path/ 'shap.png', bbox_inches='tight')
 
 def save_training_output(output, *, directory):
     model = output['model']
     metrics = output['metrics']
+    plots = output['plots']
     save_model(model, path=directory / filenames.MODEL)
     save_metrics(metrics, path=directory / filenames.METRICS)
+    save_plots(plots, path=directory)
 
 def save_rai_training_output(output, *, directory):
 

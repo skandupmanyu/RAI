@@ -18,7 +18,8 @@ def clean_age_income(data):
 
     logger.info(f"Removing null income - remaining records:  {model_input.shape}")
 
-    model_input = model_input[(model_input[AGE] > 18) & (model_input[AGE] > 80)]
+    # model_input = model_input[(model_input[AGE] > 18) & (model_input[AGE] > 80)]
+    model_input = model_input[(model_input[AGE] > 18)]
 
     logger.info(f"Removing ages <18 & >80 - remaining records:  {model_input.shape}")
 
@@ -35,19 +36,19 @@ def create_race_groupings(model_input):
 
     # by group
     conditions = [
+        (model_input.HISPAN == 1),
         (model_input.RACE == 4) | (model_input.RACE == 5) | (model_input.RACE == 6),
         (model_input.RACE == 1) & (model_input.HISPAN == 0),
-        (model_input.HISPAN == 1),
         (model_input.RACE == 2)
     ]
 
-    choices = ['Asian', 'White not Hispanic', 'Hispanic any race', 'Black']
-    model_input['RACE_Grp'] = np.select(conditions, choices, default='Other race')
-    model_input['non_white'] = 1 - np.where(model_input['RACE_Grp'] == 'White not Hispanic', 1, 0)
-    model_input['hispanic'] = np.where(model_input['RACE_Grp'] == 'Hispanic any race', 1, 0)
-    model_input['black'] = np.where(model_input['RACE_Grp'] == 'black', 1, 0)
-    model_input['asian'] = 1 - np.where(model_input['RACE_Grp'] == 'Asian', 1, 0)
-    model_input['other_race'] = np.where(model_input['RACE_Grp'] == 'Other race', 1, 0)
+    choices = ['Hispanic any race', 'Asian', 'White not Hispanic', 'Black']
+    model_input['race_group'] = np.select(conditions, choices, default='Other race')
+    model_input['non_white'] = 1 - np.where(model_input['race_group'] == 'White not Hispanic', 1, 0)
+    model_input['hispanic'] = np.where(model_input['race_group'] == 'Hispanic any race', 1, 0)
+    model_input['black'] = np.where(model_input['race_group'] == 'black', 1, 0)
+    model_input['asian'] = 1 - np.where(model_input['race_group'] == 'Asian', 1, 0)
+    model_input['other_race'] = np.where(model_input['race_group'] == 'Other race', 1, 0)
 
 
     ### Not super representative of the US - skews more white

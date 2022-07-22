@@ -11,14 +11,14 @@ from sklearn.tree import DecisionTreeClassifier
 from sklearn.preprocessing import LabelEncoder
 from sklearn import datasets, metrics, model_selection, svm
 
-from src.config.config import get_config
+from src import config
 from src.constants.columns import *
 from src.constants.features import *
 
 __all__ = ['build_features_set']
 
 logger = logging.getLogger(__name__)
-config = get_config()
+
 
 
 def build_features_set(model_sample, num_vars, cat_vars):

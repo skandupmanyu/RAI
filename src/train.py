@@ -5,18 +5,15 @@ import pandas as pd
 from sklearn.metrics import r2_score
 from sklearn.model_selection import train_test_split, GridSearchCV
 
-from RAI import ModelBiasRanker
-from evaluation import evaluate_model
-from in_out import save_dataset
-from config.directories import directories
-from constants import CROSS_TAB_METRICS, INCTOT
-from config.config import get_config
+from src.RAI import ModelBiasRanker
+from src.evaluation import evaluate_model, create_plots
+from src.in_out import save_dataset
+from src.config.directories import directories
+from src.constants import CROSS_TAB_METRICS, INCTOT
 
 logger = logging.getLogger(__name__)
-config = get_config()
 
-
-def train_proxy(model, model_data):
+def train_proxy(model, model_data, config):
     X = model_data.drop(labels=[config.pg_target], axis=1)
     X = X.drop(labels=['ID',INCTOT], axis=1)
 
@@ -47,6 +44,10 @@ def train_proxy(model, model_data):
         for features in ((X_test, y_test),(X_train, y_train))
     )
 
+    train_plots = (
+        create_plots(fitted_model, X=X_train, y=y_train)
+    )
+
     metrics_msg = "=" * 10 + " Metrics " + "=" * 10
     logger.info(metrics_msg)
     logger.info(f"Train: {train_metrics}")
@@ -69,13 +70,14 @@ def train_proxy(model, model_data):
 
     return {
         'model': fitted_model,
+        'plots': train_plots,
         'metrics': {
             'train': train_metrics,
             'test': test_metrics
         }
     }
 
-def train_rai(fitted_model, model, model_data):
+def train_rai(fitted_model, model, model_data, config):
 
 
     X = model_data.drop(labels=[config.pg_target], axis=1)

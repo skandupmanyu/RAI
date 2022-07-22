@@ -1,3 +1,4 @@
 - read the config once and send it in all functions
 - lower case all columns
-- take the 7.1% from the table
+- take the 7.1% from the table: to have it auto from the dataset you have to run the run_dataset.py (we need to set a value by default in the yaml
+or save it somewhere
