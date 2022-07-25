@@ -25,7 +25,7 @@ def main():
     logger.info("Training job for proxy variable done...")
     logger.info(f"Took {run_duration:.2f}s to execute")
     logger.info("Storing model and evaluation metrics")
-    save_training_output(training_output, directory=directories.artefacts_dir / config.model['name'])
+    save_training_output(training_output, directory=directories.model)
 
     #train rai
     start = time.time()
@@ -35,7 +35,7 @@ def main():
     logger.info("Training job for proxy variable done...")
     logger.info(f"Took {run_duration:.2f}s to execute")
     logger.info("Storing model and evaluation metrics")
-    save_rai_training_output(rai_training_output, directory=directories.artefacts_dir / config.model['name'])
+    save_rai_training_output(rai_training_output, directory=directories.model)
 
 if __name__ == '__main__':
     main()

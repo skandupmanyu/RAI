@@ -5,10 +5,10 @@ import pandas as pd
 from sklearn.metrics import r2_score
 from sklearn.model_selection import train_test_split, GridSearchCV
 
+from src import directories
 from src.RAI import ModelBiasRanker
 from src.evaluation import evaluate_model, create_plots
 from src.in_out import save_dataset
-from src.config import directories
 from src.constants import CROSS_TAB_METRICS, INCTOT
 
 logger = logging.getLogger(__name__)
@@ -26,10 +26,10 @@ def train_proxy(model, model_data, config):
 
     X_train, X_test, y_train, y_test = train_test_split(X, y, train_size=config.test_cutoff, random_state=config.split_random_size)
     #save training and test set
-    save_dataset(X_train, path=directories.artefacts_dir / config.model['name'] / 'pg_x_train.csv')
-    save_dataset(X_test, path=directories.artefacts_dir / config.model['name'] / 'pg_x_test.csv')
-    save_dataset(y_train, path=directories.artefacts_dir / config.model['name'] / 'pg_y_train.csv')
-    save_dataset(y_test, path=directories.artefacts_dir / config.model['name'] / 'pg_y_test.csv')
+    save_dataset(X_train, path=directories.model / 'pg_x_train.csv')
+    save_dataset(X_test, path=directories.model / 'pg_x_test.csv')
+    save_dataset(y_train, path=directories.model / 'pg_y_train.csv')
+    save_dataset(y_test, path=directories.model / 'pg_y_test.csv')
 
     logger.info(f"Train's shape: {X_train.shape}")
     logger.info(f"Test's shape: {X_test.shape}")
@@ -66,7 +66,7 @@ def train_proxy(model, model_data, config):
     crosstab_accuracy = pd.crosstab(model_data[config.pg_target],
                 np.where(fitted_model.predict_proba(X)[::, 1] > pg_rate_thresh, 1, 0))  # .apply(lambda r: r/r.sum(), axis=1)
 
-    save_dataset(crosstab_accuracy, path=directories.artefacts_dir / config.model['name']/ CROSS_TAB_METRICS)
+    save_dataset(crosstab_accuracy, path=directories.model/ CROSS_TAB_METRICS)
 
     return {
         'model': fitted_model,
@@ -81,7 +81,7 @@ def train_rai(fitted_model, model, model_data, config):
 
 
     X = model_data.drop(labels=[config.pg_target], axis=1)
-    X = X.drop(labels=['ID',INCTOT], axis=1)
+    X = X.drop(labels=['id',INCTOT], axis=1)
     pred_proba = fitted_model.predict_proba(X)[::,1]
 
     pg_target_proxy = f'{config.pg_target}_proxy'
@@ -98,7 +98,7 @@ def train_rai(fitted_model, model, model_data, config):
     bias_actual = model_data[[config.pg_target, config.rai_target]].groupby([config.pg_target]).mean()
 
     # actual
-    X_actual = model_data.drop([config.rai_target, pg_target_proxy, config.pg_target, 'ID',INCTOT], axis=1)
+    X_actual = model_data.drop([config.rai_target, pg_target_proxy, config.pg_target, 'id',INCTOT], axis=1)
     y_actual = model_data[config.rai_target]
     y_pg = model_data[config.pg_target]
 
