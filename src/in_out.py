@@ -17,14 +17,8 @@ def get_data(config):
 
     ## Download input file from BCG Egnyte - RAI folder
     ## https://bcg01.egnyte.com/navigate/folder/881ba5c2-8f6e-4eb6-b940-848faa78dee9
-    input_path = directories.raw_data_dir / filenames.INPUT_DATASET,
-    dataset = load_dataset(input_path[0],
-                          compression='gzip',
-                          header=0,
-                          sep=',',
-                          quotechar='"',
-                          error_bad_lines=False,
-                          usecols=config.features.keys())
+    input_path = directories.raw_data_dir / config.input_data,
+    dataset = load_dataset(input_path[0], config)
     logger.info(f"Dataset loaded with {len(dataset)} rows.")
 
     return dataset
@@ -34,14 +28,29 @@ def save_dataset(dataset, *, path):
     logger.info(f"Dataset saved at {path.relative_to(directories.project_root)}")
 
 
-def load_dataset(path, **params):
+def load_dataset(path, config):
     try:
-        data = pd.read_csv(path, **params)
+        if not config.load_data['select_columns']:
+            if not config.load_data['load_params']:
+                data = pd.read_csv(path)
+            else:
+                data = pd.read_csv(path, **config.load_data['load_params'])
+        else:
+            if not config.load_data['load_params']:
+                data = pd.read_csv(path, usecols=config.use_features)
+            else:
+                data = pd.read_csv(path, **config.load_data['load_params'], usecols=config.use_features)
     except FileNotFoundError as e:
         raise DatasetNotFoundError(f"{path} is missing...") from e
 
     return data
 
+def load_intermediary_dataset(path):
+    try:
+        data = pd.read_csv(path)
+    except FileNotFoundError as e:
+        raise DatasetNotFoundError(f"{path} is missing...") from e
+    return data
 
 def save_model(model, *, path):
     return joblib.dump(model, path)

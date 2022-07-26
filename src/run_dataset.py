@@ -16,7 +16,7 @@ def main():
     """ Build a dataset and save it as intermediate data. """
     logger.info("Building dataset...")
     dataset = build_dataset(config)
-    save_path = directories.intermediate_data_dir / DATASET
+    save_path = directories.intermediate_data_dir / config.model_name/DATASET
     save_dataset(dataset, path=save_path)
 
 

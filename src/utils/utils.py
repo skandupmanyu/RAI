@@ -11,49 +11,26 @@ logger = logging.getLogger(__name__)
 
 
 def clean_age_income(data):
+    logger.info(f"Removing ages <18 - remaining records:  {data.shape}")
+    data = data[(data[AGE] >= 18)]
+    return (data)
 
-    logger.info(f"Starting individual/year records: {data.shape}")
-    model_input = data[data[INCTOT] != 9999999]
-    model_input = model_input[model_input[INCTOT] > 0]
+def strip_whitespace(data):
+    logger.info(f"Strip whitespace")
+    return data.replace(r"^ +| +$", r"", regex=True)
 
-    logger.info(f"Removing null income - remaining records:  {model_input.shape}")
+def create_race_groupings(model_input, config):
 
-    # model_input = model_input[(model_input[AGE] > 18) & (model_input[AGE] > 80)]
-    model_input = model_input[(model_input[AGE] > 18)]
+    race = {}
+    race['white'] = np.where(model_input['race'] == 'White', 1, 0)
+    race['hispanic'] = np.where(model_input['race'] == 'Hispanic any race', 1, 0)
+    race['amer_indian'] = np.where(model_input['race'] == 'Amer-Indian-Eskimo', 1, 0)
+    race['black'] = np.where(model_input['race'] == 'Black', 1, 0)
+    race['asian'] = np.where(model_input['race'] == 'Asian-Pac-Islander', 1, 0)
+    race['other_race'] = np.where(model_input['race'] == 'Other', 1, 0)
 
-    logger.info(f"Removing ages <18 & >80 - remaining records:  {model_input.shape}")
-
-    return (model_input)
-
-
-def create_race_groupings(model_input):
-    #### Group based on US Census race definitions
-
-    # Group 1: Asian
-    # Group 2: White, not Hispanic
-    # Group 3: Hispanic (any race)
-    # Group 4: Black
-
-    # by group
-    conditions = [
-        (model_input['hispan'] == 1),
-        (model_input['race'] == 4) | (model_input['race'] == 5) | (model_input['race'] == 6),
-        (model_input['race'] == 1) & (model_input['hispan'] == 0),
-        (model_input['race'] == 2)
-    ]
-
-    choices = ['Hispanic any race', 'Asian', 'White not Hispanic', 'Black']
-    model_input['race_group'] = np.select(conditions, choices, default='Other race')
-    model_input['non_white'] = 1 - np.where(model_input['race_group'] == 'White not Hispanic', 1, 0)
-    model_input['hispanic'] = np.where(model_input['race_group'] == 'Hispanic any race', 1, 0)
-    model_input['black'] = np.where(model_input['race_group'] == 'black', 1, 0)
-    model_input['asian'] = 1 - np.where(model_input['race_group'] == 'Asian', 1, 0)
-    model_input['other_race'] = np.where(model_input['race_group'] == 'Other race', 1, 0)
-
-
-    ### Not super representative of the US - skews more white
-    # print(model_input['RACE_Grp'].value_counts(normalize=True))
-
+    model_input[config.pg_target] = race[config.pg_target]
+    model_input = model_input.drop('race',axis=1)
     return model_input
 
 def clean_column_names(column_list):

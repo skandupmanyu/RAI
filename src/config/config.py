@@ -7,7 +7,10 @@ from dataclasses import dataclass
 
 @dataclass(frozen=True)
 class Config:
+    input_data: str
+    load_data: dict
     model_name: str
+    use_features: list
     pg_target: str
     rai_target: str
     pos_rate: float

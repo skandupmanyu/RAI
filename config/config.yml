@@ -1,26 +1,47 @@
-model_name: 'proxy_model_race_income'
+model_name: 'proxy_model_race_income_adult'
 
-pg_target: 'hispanic'  #target list = ['hispanic','black','asian','non_white','other_race']
-rai_target: 'high_income'
+#------------load dataset------------------------
+input_data: 'adult_binary.csv'
+load_data:
+  select_columns: True
+  load_params: null
+sample_size: null
+features:
+  AGE : 'age'
+  RACE : 'race'
+  SEX : 'sex'
+  YEAR : null
+  MET2013 : null
+use_features:
+  - 'age'
+  - 'workclass'
+#  - 'fnlwgt'
+#  - 'education'
+  - 'education-num'
+  - 'marital-status'
+  - 'occupation'
+  - 'relationship'
+  - 'race'
+  - 'sex'
+  - 'capital-gain'
+  - 'capital-loss'
+  - 'hours-per-week'
+  - 'native-country'
+  - 'rich'
+#  age,workclass,fnlwgt,education,education-num,marital-status,occupation,relationship,race,sex,capital-gain,capital-loss,hours-per-week,native-country,rich
+
+
+#-------------model parameters-----------------------
+pg_target: 'black'
+rai_target: 'rich'
 pos_rate: 0.2
 bias_ranker:
   pos_rate: 0.2
   bias_tolerance: 0.2
 latest_year_dataset: 2020
-sample_size: 200000
 random_state_sample: 42
-features:
-  INCTOT : 'inctot' #
-  AGE : 'age'
-  YEAR : 'year'
-  MET2013 : 'met2013'  #2013 US Census metropolitan area
-  RACE : 'race'
-  HISPAN : 'hispan'
-  RENT : 'rent'
-  MORTGAGE : 'mortgage'
-  HHTYPE : 'hhtype'  #similar to married status/with dependents
-  EDUC : 'educ'  #educated
-  MARST : 'marst'  #Marital status
+
+#-------------binary model parameters--------------------
 model:
   name: 'LGBMClassifier'
   params:

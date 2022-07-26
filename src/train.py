@@ -9,13 +9,12 @@ from src import directories
 from src.RAI import ModelBiasRanker
 from src.evaluation import evaluate_model, create_plots
 from src.in_out import save_dataset
-from src.constants import CROSS_TAB_METRICS, INCTOT
+from src.constants import CROSS_TAB_METRICS, BIAS_ACTUAL, BIAS_PROXY
 
 logger = logging.getLogger(__name__)
 
 def train_proxy(model, model_data, config):
-    X = model_data.drop(labels=[config.pg_target], axis=1)
-    X = X.drop(labels=['id',INCTOT], axis=1)
+    X = model_data.drop(labels=[config.pg_target, config.rai_target], axis=1)
 
     y = model_data[config.pg_target]
 
@@ -80,13 +79,16 @@ def train_proxy(model, model_data, config):
 def train_rai(fitted_model, model, model_data, config):
 
 
-    X = model_data.drop(labels=[config.pg_target], axis=1)
-    X = X.drop(labels=['id',INCTOT], axis=1)
+    X = model_data.drop(labels=[config.pg_target, config.rai_target], axis=1)
     pred_proba = fitted_model.predict_proba(X)[::,1]
 
     pg_target_proxy = f'{config.pg_target}_proxy'
-    model_data[pg_target_proxy] = np.where(pred_proba > config.pos_rate, 1, 0)
-    model_data[config.rai_target] = np.where(model_data[INCTOT] > np.percentile(model_data[INCTOT], 80), 1, 0)
+
+    pg_rate = model_data[config.pg_target].value_counts(normalize=True)[1]
+    pg_rate_thresh = np.percentile(pred_proba, 100 * (1 - pg_rate))
+
+    model_data[pg_target_proxy] = np.where(pred_proba > pg_rate_thresh, 1, 0)
+
     y_pg_proxy = model_data[pg_target_proxy]
     logger.info(
         f"{config.rai_target} distribution: {model_data[config.rai_target].value_counts(normalize=True)}.")
@@ -94,11 +96,12 @@ def train_rai(fitted_model, model, model_data, config):
 
     #save dataframe historical bias
     bias_proxy = model_data[[pg_target_proxy, config.rai_target]].groupby([pg_target_proxy]).mean()
-
     bias_actual = model_data[[config.pg_target, config.rai_target]].groupby([config.pg_target]).mean()
+    save_dataset(bias_proxy, path=directories.model / BIAS_ACTUAL)
+    save_dataset(bias_actual, path=directories.model / BIAS_PROXY)
 
     # actual
-    X_actual = model_data.drop([config.rai_target, pg_target_proxy, config.pg_target, 'id',INCTOT], axis=1)
+    X_actual = model_data.drop([config.rai_target, pg_target_proxy, config.pg_target], axis=1)
     y_actual = model_data[config.rai_target]
     y_pg = model_data[config.pg_target]
 

@@ -9,6 +9,7 @@ class _Directories:
         self.data = self.project_root / 'data'
         self.raw_data_dir = self.data / 'raw'
         self.intermediate_data_dir = self.data / 'intermediate'
+        self.model_intermediary_data_dir = self.intermediate_data_dir / config.model_name
         self.project_config = self.project_root / 'config'
         self.artefacts_dir = self.data / 'artefacts'
         self.model = self.artefacts_dir / config.model_name

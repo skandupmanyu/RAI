@@ -7,7 +7,7 @@ from lightgbm import LGBMClassifier
 
 from src import config, directories
 from src.constants.filenames import DATASET
-from src.in_out import load_dataset, save_training_output, save_rai_training_output
+from src.in_out import load_intermediary_dataset, save_training_output, save_rai_training_output
 from src.train import train_proxy, train_rai
 
 logger = logging.getLogger(__name__)
@@ -18,8 +18,8 @@ def main():
     start = time.time()
     logger.info("Starting training job for proxy variable...")
     model = LGBMClassifier(**config.model['params'])
-    dataset_path = directories.intermediate_data_dir / DATASET
-    dataset = load_dataset(dataset_path)
+    dataset_path = directories.model_intermediary_data_dir / DATASET
+    dataset = load_intermediary_dataset(dataset_path)
     training_output = train_proxy(model, dataset, config)
     run_duration = time.time() - start
     logger.info("Training job for proxy variable done...")
