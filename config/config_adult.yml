@@ -1,0 +1,58 @@
+model_name: 'proxy_model_race_income_ipums'
+
+#------------load dataset------------------------
+input_data: 'adult_binary.csv'
+load_data:
+  select_columns: True
+  load_params: null
+sample_size: null
+features:
+  AGE : 'age'
+  RACE : 'race'
+  SEX : 'sex'
+  YEAR : null
+  MET2013 : null
+use_features:
+  - 'age'
+  - 'workclass'
+#  - 'fnlwgt'
+#  - 'education'
+  - 'education-num'
+  - 'marital-status'
+  - 'occupation'
+  - 'relationship'
+  - 'race'
+  - 'sex'
+  - 'capital-gain'
+  - 'capital-loss'
+  - 'hours-per-week'
+  - 'native-country'
+  - 'rich'
+#  age,workclass,fnlwgt,education,education-num,marital-status,occupation,relationship,race,sex,capital-gain,capital-loss,hours-per-week,native-country,rich
+
+
+#-------------model parameters-----------------------
+pg_target: 'black'
+rai_target: 'rich'
+pos_rate: 0.2
+bias_ranker:
+  pos_rate: 0.2
+  bias_tolerance: 0.2
+latest_year_dataset: 2020
+random_state_sample: 42
+
+#-------------binary model parameters--------------------
+model:
+  name: 'LGBMClassifier'
+  params:
+    max_depth: 3
+    n_estimators: 1000
+    objective: "binary"
+  training_params:
+    early_stopping_rounds: 100
+    verbose: 100
+  grid_search:
+    n_estimators: [100, 200, 400]
+    max_depth: [4, 6, 8, 10]
+test_cutoff: 0.8
+split_random_size: 42
