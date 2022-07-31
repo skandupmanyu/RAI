@@ -1,40 +1,34 @@
-model_name: 'proxy_model_race_income_ipums'
+model_name: 'proxy_model_race_income_adult'
 
 #------------load dataset------------------------
 input_data: 'adult_binary.csv'
+data_type: 'adult' #choose between ['adult','ipums']
 load_data:
-  select_columns: True
+  select_columns:  #parameters to select the columns to read
+    use_features:
+        #####-----change here-------### should be written exactly as is in the dataset
+      - 'age'
+      - 'education-num'
+      - 'marital-status'
+      - 'occupation'
+        #####-----------------------###
+      - 'race'
+      - 'sex'
+      - 'rich'
   load_params: null
-sample_size: null
+
+
+sample_size: null  #sample size during selection of training set
 features:
-  AGE : 'age'
+  AGE : null
   RACE : 'race'
   SEX : 'sex'
-  YEAR : null
-  MET2013 : null
-use_features:
-  - 'age'
-  - 'workclass'
-#  - 'fnlwgt'
-#  - 'education'
-  - 'education-num'
-  - 'marital-status'
-  - 'occupation'
-  - 'relationship'
-  - 'race'
-  - 'sex'
-  - 'capital-gain'
-  - 'capital-loss'
-  - 'hours-per-week'
-  - 'native-country'
-  - 'rich'
-#  age,workclass,fnlwgt,education,education-num,marital-status,occupation,relationship,race,sex,capital-gain,capital-loss,hours-per-week,native-country,rich
 
 
 #-------------model parameters-----------------------
 pg_target: 'black'
 rai_target: 'rich'
-pos_rate: 0.2
+threshold_rai_target: 0.8
 bias_ranker:
   pos_rate: 0.2
   bias_tolerance: 0.2

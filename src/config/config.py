@@ -8,12 +8,12 @@ from dataclasses import dataclass
 @dataclass(frozen=True)
 class Config:
     input_data: str
+    data_type: str
     load_data: dict
     model_name: str
-    use_features: list
     pg_target: str
     rai_target: str
-    pos_rate: float
+    threshold_rai_target: float
     latest_year_dataset: float
     sample_size: float
     random_state_sample: float

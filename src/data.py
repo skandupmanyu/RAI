@@ -11,7 +11,8 @@ from src.constants import *
 from src.features import build_features_set
 from src.in_out import *
 from src.utils.utils import (clean_age_income,
-                             create_race_groupings,
+                             create_race_groupings_adult,
+                             create_race_groupings_ipums,
                              clean_column_names,
                              strip_whitespace)
 
@@ -28,6 +29,11 @@ def build_dataset(config):
     dataset = get_data(config)
     dataset = dataset.rename(clean_column_names(dataset.columns), axis=1)
 
+    if config.sample_size:
+        logger.info(f"Take sample and build model input dataframe")
+        dataset = dataset.sample(n=config.sample_size,
+                                      random_state=config.random_state_sample)
+
     if config.features['AGE']:
         logger.info("Filter down to working age (18-80) records for which we have income")
         dataset = clean_age_income(dataset)
@@ -35,29 +41,32 @@ def build_dataset(config):
     logger.info("Strip whitespaces")
     dataset = strip_whitespace(dataset)
 
-    logger.info(f"Create a binary target variables")
-    dataset = create_race_groupings(dataset, config)
+    if config.data_type == 'adult':
+        logger.info(f"Create a binary target variables")
+        dataset = create_race_groupings_adult(dataset, config)
 
-    if config.features['YEAR']:
+    if config.data_type == 'ipums':
+        logger.info(f"Create a binary target variables")
+        dataset = create_race_groupings_ipums(dataset, config)
         logger.info(f"Select only historical data for training")
         dataset_historical = dataset[dataset[YEAR] < config.latest_year_dataset]
+        dataset_historical = dataset_historical.drop(YEAR, axis=1)
+        dataset = dataset.drop(YEAR, axis=1)
 
-    targets = [config.pg_target, INCTOT, AGE]
+        targets = [config.pg_target, INCTOT, AGE]
 
-    if config.features['YEAR']: #to_change
         dataset, numerical_columns_created = msa_extractor(dataset, dataset_historical, targets)
 
-    if config.sample_size:
-        logger.info(f"Take sample and build model input dataframe")
-        dataset = dataset.sample(n=config.sample_size,
-                                      random_state=config.random_state_sample)  # Thinking about sample
+        num_vars = dataset._get_numeric_data().columns.tolist()
+        num_vars = list(set(num_vars) - set([config.pg_target, config.rai_target]))
+        cat_vars = ['educ','marst']
+        dataset_feat = build_features_set(dataset, num_vars, cat_vars, config)
 
-    num_vars = dataset._get_numeric_data().columns.tolist()
-    num_vars = list(set(num_vars) - set([config.pg_target, config.rai_target]))
-    cat_vars = dataset.select_dtypes(include=['object']).columns.tolist()
-
-
-    dataset_feat = build_features_set(dataset, num_vars, cat_vars, config)
+    else:
+        num_vars = dataset._get_numeric_data().columns.tolist()
+        num_vars = list(set(num_vars) - set([config.pg_target, config.rai_target]))
+        cat_vars = dataset.select_dtypes(include=['object']).columns.tolist()
+        dataset_feat = build_features_set(dataset, num_vars, cat_vars, config)
 
     return dataset_feat
 
@@ -69,5 +78,6 @@ def msa_extractor(model_input, model_input_historical, targets):
 
     model_input = model_input.merge(summary_df_yr_msa, on=MET2013)
     numerical_columns_created = summary_df_yr_msa.columns[1:].to_list()
+    model_input = model_input.drop('met2013', axis=1)
 
     return model_input, numerical_columns_created

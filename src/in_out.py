@@ -37,9 +37,9 @@ def load_dataset(path, config):
                 data = pd.read_csv(path, **config.load_data['load_params'])
         else:
             if not config.load_data['load_params']:
-                data = pd.read_csv(path, usecols=config.use_features)
+                data = pd.read_csv(path, usecols=config.load_data['select_columns']['use_features'])
             else:
-                data = pd.read_csv(path, **config.load_data['load_params'], usecols=config.use_features)
+                data = pd.read_csv(path, **config.load_data['load_params'], usecols=config.load_data['select_columns']['use_features'])
     except FileNotFoundError as e:
         raise DatasetNotFoundError(f"{path} is missing...") from e
 

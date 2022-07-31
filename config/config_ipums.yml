@@ -1,32 +1,55 @@
-input_data: 'usa_IPUMS_2022.csv.gz' #'adult.csv'
-data_load_params:
-  compression: 'gzip'
-  header: 0
-  sep: ','
-  quotechar: '"'
-  error_bad_lines: False
-model_name: 'proxy_model_race_income'
-pg_target: 'hispanic'  #target list = ['hispanic','black','asian','non_white','other_race']
-rai_target: 'high_income'
-pos_rate: 0.2
+model_name: 'proxy_model_race_income_ipums'
+
+#------------load dataset------------------------
+input_data: 'usa_IPUMS_2022.csv.gz'
+data_type: 'ipums' #choice between ['adult','ipums']
+load_data:
+  select_columns: #parameters to select the columns to read
+    use_features:  #should be written exactly as is in the dataset
+        #####-----change here-------###
+      - 'AGE'
+      - 'EDUC'
+      - 'MARST'
+      - 'SEX'
+        #####-----------------------###
+      - 'RACE'
+      - 'HISPAN' #we need this for hispanic dataset
+      - 'INCTOT'
+      - 'YEAR'
+      - 'MET2013'
+  load_params:  #dataset loading parameters
+    compression : 'gzip'
+    header : 0
+    sep : ','
+    quotechar : '"'
+    error_bad_lines : False
+
+
+sample_size: 200000  #sample size during selection of training set
+features:
+  AGE : 'age'
+  RACE : 'race'
+  SEX : 'sex'
+  INCTOT: 'inctot' #
+  YEAR: 'year'
+  MET2013: 'met2013'  #2013 US Census metropolitan area
+  RENT: 'rent'
+  MORTGAGE: 'mortgage'
+  EDUC: 'educ'  #educated
+  MARST: 'marst'  #Marital status
+
+
+#-------------model parameters-----------------------
+pg_target: 'hispanic'
+rai_target: 'inctot'
+threshold_rai_target: 0.8
 bias_ranker:
   pos_rate: 0.2
   bias_tolerance: 0.2
 latest_year_dataset: 2020
-sample_size: 200000
 random_state_sample: 42
-features:
-  INCTOT : 'inctot' #
-  AGE : 'age'
-  YEAR : 'year'
-  MET2013 : 'met2013'  #2013 US Census metropolitan area
-  RACE : 'race'
-  HISPAN : 'hispan'
-  RENT : 'rent'
-  MORTGAGE : 'mortgage'
-  HHTYPE : 'hhtype'  #similar to married status/with dependents
-  EDUC : 'educ'  #educated
-  MARST : 'marst'  #Marital status
+
+#-------------binary model parameters--------------------
 model:
   name: 'LGBMClassifier'
   params:
