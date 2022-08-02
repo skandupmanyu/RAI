@@ -55,11 +55,12 @@ def build_dataset(config):
 
         targets = [config.pg_target, INCTOT, AGE]
 
-        dataset, numerical_columns_created = msa_extractor(dataset, dataset_historical, targets)
+        # dataset, numerical_columns_created = msa_extractor(dataset, dataset_historical, targets)
 
         num_vars = dataset._get_numeric_data().columns.tolist()
         num_vars = list(set(num_vars) - set([config.pg_target, config.rai_target]))
-        cat_vars = ['educ','marst']
+
+        cat_vars = ['education','marital-status','sex']
         dataset_feat = build_features_set(dataset, num_vars, cat_vars, config)
 
     else:

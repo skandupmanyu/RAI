@@ -1,35 +1,29 @@
-model_name: 'proxy_model_race_income_ipums_reduced'   #####-----change here-------###
+model_name: 'proxy_model_black_income_ipums_standard'
 
 #------------load dataset------------------------
-input_data: 'usa_IPUMS_2022.csv.gz'   #####-----change here-------###
-data_type: 'ipums' #choose between ['adult','ipums']  #####-----change here-------###
+input_data: 'ipums_standard_black.csv'
+data_type: 'ipums' #choice between ['adult','ipums']
 load_data:
-  select_columns:  #parameters to select the columns to read
-    use_features:
-        #####-----change here-------### should be written exactly as is in the dataset
-      - 'AGE'
-#      - 'EDUC'
-#      - 'MARST'
-      - 'SEX'
+  select_columns: #parameters to select the columns to read
+    use_features:  #should be written exactly as is in the dataset
+        #####-----change here-------###
+      - 'age'
+      - 'education'
+      - 'marital-status'
+      - 'sex'
         #####-----------------------###
-      - 'RACE'
+      - 'race'
       - 'HISPAN' #we need this for hispanic dataset
       - 'INCTOT'
       - 'YEAR'
-      - 'MET2013'
-  load_params: #dataset loading parameters
-    compression: 'gzip'
-    header: 0
-    sep: ','
-    quotechar: '"'
-    error_bad_lines: False
+  load_params: null
 
 
-sample_size: 200000  #sample size during selection of training set
+sample_size: null  #sample size during selection of training set
 features:
-  AGE: 'age'
-  RACE: 'race'
-  SEX: 'sex'
+  AGE : 'age'
+  RACE : 'race'
+  SEX : 'sex'
   INCTOT: 'inctot' #
   YEAR: 'year'
   MET2013: 'met2013'  #2013 US Census metropolitan area
@@ -40,7 +34,7 @@ features:
 
 
 #-------------model parameters-----------------------
-pg_target: 'hispanic'
+pg_target: 'black'
 rai_target: 'inctot'
 threshold_rai_target: 0.8
 bias_ranker:
@@ -64,3 +58,7 @@ model:
     max_depth: [4, 6, 8, 10]
 test_cutoff: 0.8
 split_random_size: 42
+
+#-------------prediction--------------------
+proportion_pg_traget_over_population: 0.1
+prediction_data: 'adult.json'

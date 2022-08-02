@@ -8,6 +8,8 @@ from dataclasses import dataclass
 @dataclass(frozen=True)
 class Config:
     input_data: str
+    proportion_pg_traget_over_population: float
+    prediction_data: str
     data_type: str
     load_data: dict
     model_name: str

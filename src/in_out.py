@@ -82,9 +82,8 @@ def load_model(path):
 
 
 def load_prediction_data(path):
-    with open(path) as fp:
-        return json.load(fp)
+    return pd.read_json(path)
 
 def save_predictions(predictions, *, path):
-    with open(path) as f:
-        json.dump(predictions, f)
+    with open(path, 'w') as f:
+        json.dump(predictions.to_dict(), f)

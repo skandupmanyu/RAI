@@ -4,6 +4,7 @@ Filenames constants
 
 
 MODEL = 'model'
+PREDICTIONS = 'prediction.json'
 METRICS = 'metrics'
 PLOTS = 'plots'
 CROSS_TAB_METRICS = 'cross_tab_accuracy'

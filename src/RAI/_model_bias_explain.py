@@ -66,12 +66,22 @@ class ModelBiasHandler:
         self.acc_ = metrics.accuracy_score(y_pred, y)
         # Confusion Matrix
         cm = pd.crosstab(y_pred, y).apply(lambda r: r / r.sum(), axis=1)
-        self.TN_ = cm[0][0]
-        self.FN_ = cm[0][1]
-        self.FP_ = cm[1][0]
-        self.TP_ = cm[1][1]
-        return
-
+        try:
+            self.TN_ = cm[0][0]
+        except:
+            self.TN_ = np.NAN
+        try:
+            self.FN_ = cm[0][1]
+        except:
+            self.FN_ = np.NAN
+        try:
+            self.FP_ = cm[1][0]
+        except:
+            self.FP_ = np.NAN
+        try:
+            self.TP_ = cm[1][1]
+        except:
+            self.TP_ = np.NAN
     def predict(self, X, pg):
         y_pred_proba = self.clf.predict_proba(X)[:, 1]
         y_pred = np.where(

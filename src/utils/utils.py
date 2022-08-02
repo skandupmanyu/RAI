@@ -16,7 +16,6 @@ def clean_age_income(data):
     return (data)
 
 def strip_whitespace(data):
-    logger.info(f"Strip whitespace")
     return data.replace(r"^ +| +$", r"", regex=True)
 
 def create_race_groupings_adult(model_input, config):
@@ -44,18 +43,19 @@ def create_race_groupings_ipums(model_input, config):
     # by group
     conditions = [
         (model_input['hispan'] == 1),
+        (model_input['race'] == 2),
         (model_input['race'] == 4) | (model_input['race'] == 5) | (model_input['race'] == 6),
-        (model_input['race'] == 1) & (model_input['hispan'] == 0),
-        (model_input['race'] == 2)
+        (model_input['race'] == 1) & (model_input['hispan'] == 0)
+
     ]
 
-    choices = ['Hispanic any race', 'Asian', 'White not Hispanic', 'Black']
+    choices = ['Hispanic any race', 'Black', 'Asian', 'White not Hispanic']
 
     group = {}
     model_input['race_group'] = np.select(conditions, choices, default='Other race')
     group['non_white'] = 1 - np.where(model_input['race_group'] == 'White not Hispanic', 1, 0)
     group['hispanic'] = np.where(model_input['race_group'] == 'Hispanic any race', 1, 0)
-    group['black'] = np.where(model_input['race_group'] == 'black', 1, 0)
+    group['black'] = np.where(model_input['race_group'] == 'Black', 1, 0)
     group['asian'] = 1 - np.where(model_input['race_group'] == 'Asian', 1, 0)
     group['other_race'] = np.where(model_input['race_group'] == 'Other race', 1, 0)
 

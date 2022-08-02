@@ -8,6 +8,7 @@ class _Directories:
         self.config = self.package / 'config'
         self.data = self.project_root / 'data'
         self.raw_data_dir = self.data / 'raw'
+        self.input = self.data / 'input'
         self.intermediate_data_dir = self.data / 'intermediate'
         self.model_intermediary_data_dir = self.intermediate_data_dir / config.model_name
         self.project_config = self.project_root / 'config'

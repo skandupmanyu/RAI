@@ -3,6 +3,7 @@ import argparse
 
 from src.run_dataset import main as run_dataset
 from src.run_train import main as run_train
+from src.run_predict import main as run_predict
 from src.run import main as run_all
 
 
@@ -11,7 +12,8 @@ logger = logging.getLogger(__name__)
 _PIPELINES_REGISTRY = {
     'dataset': run_dataset,
     'train': run_train,
-    'run': run_all
+    'run': run_all,
+    'predict': run_predict
 }
 
 
