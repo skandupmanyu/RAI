@@ -1,7 +1,7 @@
-model_name: 'proxy_model_hispanic_income_ipums_processed_remove_msa'
+model_name: 'proxy_model_hispanic_income_ipums_processed_to_standard_values'
 
 #------------load dataset------------------------
-input_data: 'ipums_processed.csv'
+input_data: 'usa_00004.csv.gz'
 load_data:
   select_columns: #parameters to select the columns to read
     use_features:  #should be written exactly as is in the dataset
@@ -10,7 +10,7 @@ load_data:
       - 'EDUC'
       - 'MARST'
       - 'SEX'
-#      - 'MET2013'
+      - 'MET2013'
         #####-----------------------###
       - 'RACE'
       - 'YEAR'
@@ -21,7 +21,7 @@ load_data:
 
 
 sample_size: 200000  #sample size during selection of training set
-use_msa: False
+use_msa: True
 features:
   numerical:
     AGE : 'age'
@@ -29,7 +29,7 @@ features:
     SEX : 'sex'
     INCTOT: 'inctot' #
     YEAR: 'year'
-#    MET2013: 'met2013'  #2013 US Census metropolitan area
+    MET2013: 'met2013'  #2013 US Census metropolitan area
   categorical:
     - 'sex'
     - 'educ'

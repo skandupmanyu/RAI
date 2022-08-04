@@ -9,7 +9,7 @@ from src import directories
 from src.RAI import ModelBiasRanker
 from src.evaluation import evaluate_model, create_plots
 from src.in_out import save_dataset
-from src.constants import CROSS_TAB_METRICS, BIAS_ACTUAL, BIAS_PROXY
+from src.constants import CROSS_TAB_METRICS, BIAS_ACTUAL, BIAS_PROXY, TPR_FPR
 
 logger = logging.getLogger(__name__)
 
@@ -65,7 +65,10 @@ def train_proxy(model, model_data, config):
     crosstab_accuracy = pd.crosstab(model_data[config.pg_target],
                 np.where(fitted_model.predict_proba(X)[::, 1] > pg_rate_thresh, 1, 0))  # .apply(lambda r: r/r.sum(), axis=1)
 
+    tpr_fpr = create_cross_tab_metrics(crosstab_accuracy)
+
     save_dataset(crosstab_accuracy, path=directories.model/ CROSS_TAB_METRICS)
+    save_dataset(tpr_fpr, path=directories.model / TPR_FPR)
 
     return {
         'model': fitted_model,
@@ -135,3 +138,10 @@ def bias_ranker(X, y, y_pg, best_estimator, pos_rate, bias_tolerance):
     bias_ranker.fit(X, y, y_pg)
 
     return bias_ranker.results_
+
+def create_cross_tab_metrics(crosstab_accuracy: pd.DataFrame) -> pd.DataFrame:
+    TPR = (crosstab_accuracy[1][1] / (crosstab_accuracy[1][1] + crosstab_accuracy[0][1])).round(2)
+    FPR = (crosstab_accuracy[0][1] / (crosstab_accuracy[0][1] + crosstab_accuracy[0][0])).round(2)
+    matrix = pd.DataFrame(index=['metrics'], data={'TPR': TPR * 100, 'FPR': FPR * 100})
+
+    return matrix
