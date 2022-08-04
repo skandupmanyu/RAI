@@ -35,7 +35,7 @@ def _load_prediction_data(config):
 
 def _predict(data, config, *, model):
     num_vars = data._get_numeric_data().columns.tolist()
-    cat_vars = data.select_dtypes(include=['object']).columns.tolist()
+    cat_vars = config.features['categorical']
 
     features = build_features_set_prediction(data, num_vars, cat_vars, config)
     pred_proba = model.predict_proba(features)[::,1]

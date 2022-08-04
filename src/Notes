@@ -1,1 +1,46 @@
 - target_pg and target_rai have to be 1 or 0 numeric format
+- features we get from insurance: income level, age, marital status, education, occupation
+- Gleb during the inference, how do we deal with each client's taxonomy of features, could lower the performances of the algo and no way to assess performances
+- there is no 2020 data, the latest is 2019, so 2020 actually takes all the data
+- In train_proxy, after get dummies is it still relevant to use .astype("category")
+- Fill the readme
+- During predictions, no need for train test split when cross val
+- Common parameters:
+    adult: marital-status, sex, age, education num, rich
+    ipums: marst, sex, age, educ, inctot
+
+adult = adult.replace(r"^ +| +$", r"", regex=True)
+adult['education'] = (adult['education'].isin(['Some-college','Bachelors','Masters','Doctorate'])).astype('int')
+filt = adult['education'] == 1
+adult.loc[filt, 'education'] = 'college'
+adult.loc[~filt, 'education'] = 'no_college'
+adult['marital-status'] = (adult['marital-status'].isin(['Married-civ-spouse','Married-spouse-absent ','Married-AF-spouse '])).astype('int')
+filt = adult['marital-status'] == 1
+adult.loc[filt, 'marital-status'] = 'married'
+adult.loc[~filt, 'marital-status'] = 'not_married'
+adult.to_csv('adult_standard.csv', index=False)
+
+ipums_select['MARST'] = (ipums_select['MARST'].isin([1,2])).astype('int')
+filt = ipums_select['MARST'] == 1
+ipums_select.loc[filt, 'MARST'] = 'married'
+ipums_select.loc[~filt, 'MARST'] = 'not_married'
+
+ipums_select['EDUC'] = (ipums_select['EDUC'].isin([10,11])).astype('int')
+filt = ipums_select['EDUC'] == 1
+ipums_select.loc[filt, 'EDUC'] = 'college'
+ipums_select.loc[~filt, 'EDUC'] = 'no_college'
+
+ipums_select['SEX'] = (ipums_select['SEX'].isin([1])).astype('int')
+filt = ipums_select['SEX'] == 1
+ipums_select.loc[filt, 'SEX'] = 'Male'
+ipums_select.loc[~filt, 'SEX'] = 'Female'
+
+
+- _model_bias_explain.py row 68 doesn't work if the model to predict rai_target but used to predict rai_pg only predicts one class ('1')
+
+
+
+- for data_historical, do we separate the deadline for msa ?
+- size of the prediction set
+- remove inctot
+- remove previous var that are dummies

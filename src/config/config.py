@@ -10,7 +10,7 @@ class Config:
     input_data: str
     proportion_pg_traget_over_population: float
     prediction_data: str
-    data_type: str
+    use_msa: bool
     load_data: dict
     model_name: str
     pg_target: str

@@ -26,7 +26,12 @@ def build_features_set(model_sample, num_vars, cat_vars, config):
         # Join
         model_data_norm['id'] = model_data_norm.index
         model_data = pd.concat([model_data_norm[[config.pg_target,config.rai_target, "id"]], model_data_cat, model_data_num], axis=1)
-        model_data = model_data.drop('id', axis=1)
+        model_data = model_data.drop(['id'], axis=1)
+        try:
+            model_data = model_data.drop(cat_vars, axis=1)
+        except:
+            logger.info(f'The following categorical variables {cat_vars} are filled with numerical values')
+
     else:
         model_data = normalize_num(model_sample, num_vars)
     # Print shape of final machine-learning ready data frame
