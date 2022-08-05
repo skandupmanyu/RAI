@@ -1,7 +1,7 @@
 model_name: 'proxy_model_hispanic_income_ipums_default_without_mortgage_hhtype'
 
 #------------load dataset------------------------
-input_data: 'usa_IPUMS_2022.csv.gz'
+input_data: 'usa_00004.csv.gz'
 load_data:
   select_columns: #parameters to select the columns to read
     use_features:  #should be written exactly as is in the dataset
