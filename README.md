@@ -1,23 +1,46 @@
-# Software Engineering for Data Scientists
+# Proxy model
 
-This training is designed to help Data Scientists gain valuable skills in Software Engineering.
+This model is designed to predict a protected group (race, gender...) based on a classification model trained on 
+IPUMS dataset as it is consider as a superior dataset for fairness assessment. 
 
 ## 1. Description
 
 ### 1.1 Business case
 
-The demo project used to make you practice the training's concepts is about predicting future sales for a **fictive retail company named ACME Inc.**
+Users of this model are insurances that seek to assess fairness and equity from their models. The
+algorithm allows to tailor a model depending on the use case(feature selection, algorithm parameters).
+We have also created a set of metrics to assess performances of the model
 
-Based on historical data, our ML model must be able to predict the sales volume for a given product, **for the coming week.**
+- Use case:
+Based on historical data, our ML model must be able to predict the race (e.g. hispanic) of their customers,
+thus evaluating the impact of one change of their solution on one group compared to others. 
 
 ### 1.2 Data
 
-The `data/` directory contains fake data representing ACME Inc.'s sales on a 3-year period.
+The `data/` directory contains all data used and generated from the model.
  
-- `products.csv` contains a list of 100 products, sold in different stores,
-- `sotres.csv` contains a list of 10 stores which sell the aforementioned products,
-- `transactions.csv` contains more than 1 million data points from May 2016 to May 2019, listing how many units of a given product where sold in a given store on a given day.
+- `raw` contains the IPUMS dataset on different formats
+- `intermediate` contains different feature set from models variations
+- `artefacts` contains model outputs (model,evaluation metrics, figures...)
+- `input` contains the dataset to predict based on the trained model 
 
+### 1.3 Config
+
+This folder contains the configuration file **config.yml**. It is the entry point for the user. This 
+file contains all the detailed parameters for different variations of the model. 
+
+
+| Parameter   |     Description     |  Values |
+|----------|:-------------:|------:|
+| model_name |  Name of folder created from running `config` | proxy_model_hispanic_income |
+| input_data |    Name of the training raw dataset located in `data/raw`   |   usa_00004.csv.gz |
+| load_data/select_columns | True if only select a set of columns while loading the dataset |   True/False |
+| load_data/use_features | list of columns to read (Use same case as in the actual dataset |    - AGE, -EDUC |
+| load_data/load_params | right-aligned |    $1 |
+| load_data/select_columns | right-aligned |    $1 |
+| load_data/select_columns | right-aligned |    $1 |
+| load_data/select_columns | right-aligned |    $1 |
+            
 `NOTE`
 
 > This data is totally fake. Consequently, the evaluation metrics values are meaningless. The goal is not to improve them!
