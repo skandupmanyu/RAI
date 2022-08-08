@@ -1,4 +1,4 @@
-model_name: 'proxy_model_hispanic_income_ipums_default'
+model_name: 'proxy_model_hispanic_income_ipums_default_before-threshold_80'
 
 #------------load dataset------------------------
 input_data: 'usa_00004.csv.gz'

@@ -13,6 +13,9 @@ logger = logging.getLogger(__name__)
 def clean_age_income(data):
     logger.info(f"Removing ages <18 - remaining records:  {data.shape}")
     data = data[(data[AGE] >= 18)]
+    logger.info("Filter down to working age (18-80) records for which we have income")
+    data = data[data[INCTOT] != 9999999]
+    data = data[data[INCTOT] > 0]
     return (data)
 
 def strip_whitespace(data):

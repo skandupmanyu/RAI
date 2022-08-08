@@ -1,4 +1,4 @@
-model_name: 'proxy_model_hispanic_income_ipums_processed_to_standard_values'
+model_name: 'proxy_model_hispanic_income_ipums_default'
 
 #------------load dataset------------------------
 input_data: 'usa_00004.csv.gz'
@@ -11,13 +11,20 @@ load_data:
       - 'MARST'
       - 'SEX'
       - 'MET2013'
+      - 'MORTGAGE'
+      - 'HHTYPE'
         #####-----------------------###
       - 'RACE'
       - 'YEAR'
       - 'HISPAN' #we need this for hispanic dataset
       - 'INCTOT'
       - 'YEAR'
-  load_params: null
+  load_params: #dataset loading parameters
+    compression: 'gzip'
+    header: 0
+    sep: ','
+    quotechar: '"'
+    error_bad_lines: False
 
 
 sample_size: 200000  #sample size during selection of training set
@@ -34,12 +41,14 @@ features:
     - 'sex'
     - 'educ'
     - 'marst'
+    - 'hhtype'
+    - 'mortgage'
 
 
 #-------------model parameters-----------------------
 pg_target: 'hispanic'
 rai_target: 'inctot'
-threshold_rai_target: 0.8
+threshold_rai_target: 80
 bias_ranker:
   pos_rate: 0.2
   bias_tolerance: 0.2

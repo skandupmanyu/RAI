@@ -34,12 +34,12 @@ def build_dataset(config):
     dataset = dataset[dataset[YEAR] <= config.latest_year_dataset]
     logger.info(f"New shape {dataset.shape}")
 
+    logger.info("Filter down to working age (18-80) records for which we have income")
+    dataset = clean_age_income(dataset)
+
     logger.info(f"Take sample and build model input dataframe")
     dataset = dataset.sample(n=config.sample_size,
                                   random_state=config.random_state_sample)
-
-    logger.info("Filter down to working age (18-80) records for which we have income")
-    dataset = clean_age_income(dataset)
 
     # logger.info("Strip whitespaces")
     # dataset = strip_whitespace(dataset)
