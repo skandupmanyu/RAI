@@ -65,6 +65,8 @@ There are 4 main functions:
 - run_predict: predict pg variables on the given prediction data through the command `python -m src predict`
 - run_all: run the 3 previous steps successively through the command `python -m src run`
 
-`NOTE`
+## 3. Training sets
 
-> This data is totally fake. Consequently, the evaluation metrics values are meaningless. The goal is not to improve them!
+The default dataset is `usa_00004.csv.gz`. This data is a comprehensive dataset with a wide taxonomy for all the features. We intend to create a model that will match with the majority of our prospective clients. 
+Hence, we selected the most probable variables and standardized their values. This will lead to extra work on the client's side for the sake of consistency and repeatability.
+We used the notebook `process ipums` to create a standardize version of the dataset. Please keep in mind that the prediction set should the exact shape and values of the feature set.
