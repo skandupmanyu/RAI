@@ -61,6 +61,7 @@ def build_dataset(config):
     # cat_vars = dataset.select_dtypes(include=['object']).columns.tolist()
     cat_vars = config.features['categorical']
     dataset_feat = build_features_set(dataset, num_vars, cat_vars, config)
+    dataset_feat = dataset_feat.reindex(sorted(dataset_feat.columns), axis=1)
 
     return dataset_feat
 
